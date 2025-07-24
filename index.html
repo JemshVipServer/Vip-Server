@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jemshᴾᴿᴼ Server</title>
+    <style>
+        body {
+            background: #121212;
+            color: #A8FF60;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #1f1f1f;
+            border: 2px solid #A8FF60;
+            border-radius: 12px;
+            padding: 2vh 2vw;
+            box-shadow: 0 0 30px rgba(168, 255, 96, 0.3);
+            text-align: center;
+            width: 90%;
+            max-width: 600px;
+        }
+        .periodBlock {
+            margin-bottom: 2vh;
+        }
+        .period {
+            font-size: 4vw;
+            font-weight: bold;
+            color: #D4FFB2;
+            text-shadow: 0 0 10px rgba(168, 255, 96, 0.5);
+        }
+        .timer {
+            font-size: 4vw;
+            font-weight: bold;
+            margin-top: 1vh;
+            color: #D4FFB2;
+            text-shadow: 0 0 10px rgba(168, 255, 96, 0.5);
+        }
+        .resultRow {
+            display: flex;
+            gap: 4vw;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .block {
+            background: linear-gradient(145deg, #2a2a2a, #1c1c1c);
+            border: 2px solid #A8FF60;
+            border-radius: 10px;
+            padding: 2vh 2vw;
+            flex: 1 1 40%;
+            min-width: 130px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(168,255,96,0.2), inset 0 0 10px rgba(168,255,96,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .title {
+            font-size: 4vw;
+            color: #ccc;
+            margin-bottom: 1vh;
+        }
+        .value {
+            font-size: 6vw;
+            font-weight: bold;
+            color: #A8FF60;
+            text-shadow: 0 0 15px rgba(168,255,96,0.5);
+        }
+        .percentage {
+            font-size: 3.5vw;
+            color: #E0FFD8;
+            margin-top: 1vh;
+        }
+        .pulse {
+            animation: pulseEffect 0.5s ease-out;
+        }
+        @keyframes pulseEffect {
+            0% { transform: scale(1); box-shadow: 0 0 20px rgba(168,255,96,0.2), inset 0 0 10px rgba(168,255,96,0.1); }
+            50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(168,255,96,0.5), inset 0 0 20px rgba(168,255,96,0.3); }
+            100% { transform: scale(1); box-shadow: 0 0 20px rgba(168,255,96,0.2), inset 0 0 10px rgba(168,255,96,0.1); }
+        }
+        @media (min-width: 600px) {
+            .period, .timer { font-size: 1.2rem; }
+            .title { font-size: 1rem; }
+            .value { font-size: 1.5rem; }
+            .percentage { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="periodBlock">
+            <div class="period" id="periodDisplay">Loading...</div>
+            <div class="timer" id="timerDisplay">00:60</div>
+        </div>
+
+        <div class="resultRow">
+            <div class="block" id="colorBlock">
+                <div class="title">Red / Green</div>
+                <div class="value" id="colorResult">Waiting...</div>
+                <div class="percentage" id="colorWinRate">0%</div>
+            </div>
+            <div class="block" id="sizeBlock">
+                <div class="title">Big / Small</div>
+                <div class="value" id="sizeResult">Waiting...</div>
+                <div class="percentage" id="sizeWinRate">0%</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let lastPeriod = "";
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        function randomPercentage() {
+            return Math.floor(Math.random() * 41) + 60; // 60 to 100
+        }
+
+        function pulseEffect(element) {
+            element.classList.remove("pulse");
+            void element.offsetWidth;  // Re-trigger animation
+            element.classList.add("pulse");
+        }
+
+        function updateResults(periodNumber) {
+            const colorOptions = ["RED", "GREEN"];
+            const sizeOptions = ["BIG", "SMALL"];
+
+            const colorResult = colorOptions[Math.floor(Math.random() * colorOptions.length)];
+            const sizeResult = sizeOptions[Math.floor(Math.random() * sizeOptions.length)];
+
+            const colorWinRate = randomPercentage();
+            const sizeWinRate = randomPercentage();
+
+            document.getElementById("colorResult").textContent = colorResult;
+            document.getElementById("sizeResult").textContent = sizeResult;
+
+            document.getElementById("colorWinRate").textContent = `Win: ${colorWinRate}%`;
+            document.getElementById("sizeWinRate").textContent = `Win: ${sizeWinRate}%`;
+
+            pulseEffect(document.getElementById("colorBlock"));
+            pulseEffect(document.getElementById("sizeBlock"));
+        }
+
+        function startTimer() {
+            setInterval(() => {
+                const now = new Date();
+                const sec = now.getUTCSeconds();
+                const remainingSec = 60 - sec;
+                const totalMin = now.getUTCHours() * 60 + now.getUTCMinutes();
+
+                const period = now.getUTCFullYear().toString() +
+                               String(now.getUTCMonth() + 1).padStart(2, '0') +
+                               String(now.getUTCDate()).padStart(2, '0') +
+                               "1000" + (10001 + totalMin);
+
+                document.getElementById("periodDisplay").textContent = period;
+                document.getElementById("timerDisplay").textContent = formatTime(remainingSec);
+
+                if (sec === 0 && lastPeriod !== period) {
+                    lastPeriod = period;
+                    updateResults(period);
+                }
+            }, 1000);
+        }
+
+        window.onload = startTimer;
+    </script>
+
+</body>
+</html>
